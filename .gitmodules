@@ -1,0 +1,9 @@
+[submodule "front-end"]
+	path = front-end
+	url = https://github.com/Linuxph/Bank_Report_Summarizer
+[submodule "back-end"]
+	path = back-end
+	url = https://github.com/Linuxph/Bank_Audit_Report_Summarizer_be
+[submodule "AI"]
+	path = AI
+	url = https://github.com/Manas452009/Bank-Audit-report-summariser
