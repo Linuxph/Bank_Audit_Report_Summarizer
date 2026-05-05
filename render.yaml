@@ -1,0 +1,44 @@
+# render.yaml — Render Blueprint for BARS
+# Deploys both services (AI + Backend) from one config.
+# See: https://render.com/docs/blueprint-spec
+#
+# IMPORTANT: The AI service directory is "AI/AI ML" (has a space).
+# Rename it to "ai-service" on disk for cleaner paths if possible.
+
+services:
+  # ── Python AI Service ──────────────────────────────────────────────────────
+  - type: web
+    name: bars-ai-service
+    runtime: python
+    rootDir: AI/AI ML
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # Set manually in Render dashboard
+      - key: PDF_WORKERS
+        value: "2"           # Free tier has 512 MB RAM, 2 workers is safe
+      - key: ALLOWED_ORIGINS
+        sync: false          # Set to your Vercel frontend URL after deploy
+
+  # ── Spring Boot Backend ────────────────────────────────────────────────────
+  - type: web
+    name: bars-backend
+    rootDir: back-end
+    buildCommand: ./mvnw clean package -DskipTests -B
+    startCommand: java -Dspring.profiles.active=prod -jar target/bars-0.0.1-SNAPSHOT.jar
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: MONGO_URI
+        sync: false          # MongoDB Atlas connection string
+      - key: JWT_SECRET
+        sync: false          # Your base64 JWT secret
+      - key: AI_SERVICE_URL
+        sync: false          # Render URL of bars-ai-service above
+      - key: CLOUDINARY_URL
+        sync: false          # cloudinary://key:secret@cloud_name
+      - key: ALLOWED_ORIGINS
+        sync: false          # Your Vercel frontend URL
